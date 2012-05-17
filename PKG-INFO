@@ -1,0 +1,12 @@
+Metadata-Version: 1.0
+Name: python-nss
+Version: 0.13
+Summary: Python bindings for Network Security Services (NSS) and Netscape Portable Runtime (NSPR)
+Home-page: http://www.mozilla.org/projects/security/pki/python-nss
+Author: John Dennis
+Author-email: jdennis@redhat.com
+License: MPLv1.1 or GPLv2+ or LGPLv2+
+Description: 
+            Python bindings for Network Security Services (NSS) and Netscape Portable Runtime (NSPR).
+            
+Platform: posix

@@ -1,0 +1,488 @@
+2012-03-20  John Dennis  <jdennis@redhat.com> 0.13
+  * Allow lables and values to be justified when printing objects
+
+  * Fix NSS SECITEM_CompareItem bug via workaround.
+
+  * Fix incorrect format strings in PyArg_ParseTuple* for:
+    - GeneralName
+    - BasicConstraints
+    - cert_x509_key_usage
+
+  * Fix hang in setup_certs.
+
+  * For NSS >= 3.13 support CERTDB_TERMINAL_RECORD
+
+  * You can now query for a specific certificate extension
+    Certficate.get_extension()
+
+  * The following class methods were added:
+    - nss.nss.Certificate.get_extension
+
+  * The following module functions were added:
+    - nss.nss.pub_wrap_sym_key
+
+  * The following internal utilities were added:
+    - PyString_UTF8
+    - SecItem_new_alloc()
+
+  * The following were deprecated:
+    - nss.nss.make_line_pairs (replaced by nss.nss.make_line_fmt_tuples)
+
+    Deprecated Functionality:
+    -------------------------
+    - make_line_pairs() has been replaced by make_line_fmt_tuples()
+      because 2-valued tuples were not sufficently general. It is
+      expected very few programs will have used this function, it's mostly
+      used internally but provided as a support utility.
+
+2011-04-22  John Dennis  <jdennis@redhat.com> 0.12
+  * Major new enhancement is additon of PKCS12 support and
+    AlgorithmID's.
+
+  * setup.py build enhancements
+    - Now searches for the NSS and NSPR header files rather
+      than hardcoding their location. This makes building friendlier
+      on other systems (i.e. debian)
+    - Now takes optional command line arguments, -d or --debug
+      will turn on debug options during the build.
+
+  * Fix reference counting bug in PK11_password_callback() which
+    contributed to NSS not being able to shutdown due to
+    resources still in use.
+
+  * Add UTF-8 support to ssl.config_server_session_id_cache()
+
+  * Added unit tests for cipher, digest, client_server.
+
+  * All unittests now run, added test/run_tests to invoke
+    full test suite.
+
+  * Fix bug in test/setup_certs.py, hardcoded full path to
+    libnssckbi.so was causing failures on 64-bit systems,
+    just use the libnssckbi.so basename, modutil will find
+    it on the standard search path.
+
+  * doc/examples/cert_dump.py uses new AlgorithmID class to
+    dump Signature Algorithm
+
+  * doc/examples/ssl_example.py now can cleanly shutdown NSS.
+
+  * Exception error messages now include PR error text if available.
+
+  * The following classes were replaced:
+    - SignatureAlgorithm replaced by new class AlgorithmID
+
+  * The following classes were added:
+    - AlgorithmID
+    - PKCS12DecodeItem
+    - PKCS12Decoder
+
+  * The following class methods were added:
+    - PK11Slot.authenticate()
+    - PK11Slot.get_disabled_reason()
+    - PK11Slot.has_protected_authentication_path()
+    - PK11Slot.has_root_certs()
+    - PK11Slot.is_disabled()
+    - PK11Slot.is_friendly()
+    - PK11Slot.is_internal()
+    - PK11Slot.is_logged_in()
+    - PK11Slot.is_removable()
+    - PK11Slot.logout()
+    - PK11Slot.need_login()
+    - PK11Slot.need_user_init()
+    - PK11Slot.user_disable()
+    - PK11Slot.user_enable()
+    - PKCS12DecodeItem.format()
+    - PKCS12DecodeItem.format_lines()
+    - PKCS12Decoder.database_import()
+    - PKCS12Decoder.format()
+    - PKCS12Decoder.format_lines()
+
+  * The following class properties were added:
+    - AlgorithmID.id_oid
+    - AlgorithmID.id_str
+    - AlgorithmID.id_tag
+    - AlgorithmID.parameters
+    - PKCS12DecodeItem.certificate
+    - PKCS12DecodeItem.friendly_name
+    - PKCS12DecodeItem.has_key
+    - PKCS12DecodeItem.shroud_algorithm_id
+    - PKCS12DecodeItem.signed_cert_der
+    - PKCS12DecodeItem.type
+    - SignedData.data
+    - SignedData.der
+
+  * The following module functions were added:
+    - nss.nss.dump_certificate_cache_info()
+    - nss.nss.find_slot_by_name()
+    - nss.nss.fingerprint_format_lines()
+    - nss.nss.get_internal_slot()
+    - nss.nss.is_fips()
+    - nss.nss.need_pw_init()
+    - nss.nss.nss_init_read_write()
+    - nss.nss.pk11_disabled_reason_name()
+    - nss.nss.pk11_disabled_reason_str()
+    - nss.nss.pk11_logout_all()
+    - nss.nss.pkcs12_cipher_from_name()
+    - nss.nss.pkcs12_cipher_name()
+    - nss.nss.pkcs12_enable_all_ciphers()
+    - nss.nss.pkcs12_enable_cipher()
+    - nss.nss.pkcs12_export()
+    - nss.nss.pkcs12_map_cipher()
+    - nss.nss.pkcs12_set_nickname_collision_callback()
+    - nss.nss.pkcs12_set_preferred_cipher()
+    - nss.nss.token_exists()
+    - nss.ssl.config_mp_server_sid_cache()
+    - nss.ssl.config_server_session_id_cache_with_opt()
+    - nss.ssl.get_max_server_cache_locks()
+    - nss.ssl.set_max_server_cache_locks()
+    - nss.ssl.shutdown_server_session_id_cache()
+
+  * The following constants were added:
+    - nss.nss.int.PK11_DIS_COULD_NOT_INIT_TOKEN
+    - nss.nss.int.PK11_DIS_NONE
+    - nss.nss.int.PK11_DIS_TOKEN_NOT_PRESENT
+    - nss.nss.int.PK11_DIS_TOKEN_VERIFY_FAILED
+    - nss.nss.int.PK11_DIS_USER_SELECTED
+    - nss.nss.int.PKCS12_DES_56
+    - nss.nss.int.PKCS12_DES_EDE3_168
+    - nss.nss.int.PKCS12_RC2_CBC_128
+    - nss.nss.int.PKCS12_RC2_CBC_40
+    - nss.nss.int.PKCS12_RC4_128
+    - nss.nss.int.PKCS12_RC4_40
+
+  * The following files were added:
+    - test/run_tests
+    - test/test_cipher.py (replaces cipher_test.py)
+    - test/test_client_server.py
+    - test/test_digest.py (replaces digest_test.py)
+    - test/test_pkcs12.py
+
+  * The following were deprecated:
+    - SignatureAlgorithm
+
+
+2011-02-21  John Dennis  <jdennis@redhat.com> 0.11
+
+    External Changes:
+    -----------------
+
+  * Bump version to 0.11
+
+  * Add AddrInfo class to support IPv6 address resolution. Supports
+    iteration over it's set of NetworkAddress objects and provides
+    hostname, canonical_name object properties.
+
+  * Add PR_AI_* constants.
+
+  * NetworkAddress constructor and NetworkAddress.set_from_string() added
+    optional family parameter. This is necessary for utilizing
+    PR_GetAddrInfoByName().
+
+  * NetworkAddress initialized via a string paramter are now initalized via
+    PR_GetAddrInfoByName using family.
+
+  * Add NetworkAddress.address property to return the address sans the
+    port as a string. NetworkAddress.str() includes the port. For IPv6 the
+    a hex string must be enclosed in brackets if a port is appended to it,
+    the bracketed hex address with appended with a port is unappropriate
+    in some circumstances, hence the new address property to permit either
+    the address string with a port or without a port.
+
+  * Fix the implementation of the NetworkAddress.family property, it was
+    returning bogus data due to wrong native data size.
+
+  * HostEntry objects now support iteration and indexing of their
+    NetworkAddress members.
+
+  * Add io.addr_family_name() function to return string representation of
+    PR_AF_* constants.
+
+  * Modify example and test code to utilize AddrInfo instead of deprecated
+    NetworkAddress functionality. Add address family command argument to
+    ssl_example.
+
+  * Fix pty import statement in test/setup_certs.py
+
+    Deprecated Functionality:
+    -------------------------
+
+  * NetworkAddress initialized via a string paramter is now
+    deprecated. AddrInfo should be used instead.
+
+  * NetworkAddress.set_from_string is now deprecated. AddrInfo should be
+    used instead.
+
+  * NetworkAddress.hostentry is deprecated. It was a bad idea,
+    NetworkAddress objects can support both IPv4 and IPv6, but a HostEntry
+    object can only support IPv4. Plus the implementation depdended on
+    being able to perform a reverse DNS lookup which is not always
+    possible.
+
+  * HostEntry.get_network_addresses() and HostEntry.get_network_address()
+    are now deprecated. In addition their port parameter is now no longer
+    respected. HostEntry objects now support iteration and
+    indexing of their NetworkAddress and that should be used to access
+    their NetworkAddress objects instead.
+
+    Internal Changes:
+    -----------------
+
+  * Utilize PR_NetAddrFamily() access macro instead of explict access.
+
+  * Add PRNetAddr_port() utility to hide host vs. network byte order
+    requirements when accessing the port inside a PRNetAddr and simplify
+    accessing the IPv4 vs. IPv6 port variants.
+
+  * Replace the use of PR_InitializeNetAddr() with PR_SetNetAddr(), the
+    later properly handles IPv6, the former did not.
+
+  * Rename NetworkAddress.addr to NetworkAddress.pr_netaddr for naming
+    consistency.
+
+  * Update HostEntry documentation to indicate it's deprecated status.
+
+  * Remove redundant implementation of NetworkAddress_new_from_PRNetAddr
+    from py_ssl.c and properly import the implementation from
+    py_nspr_io.c.
+
+  * The following other non-IPv6 fixes were also made because they were
+    discovered while doing the IPv6 work:
+
+  * Move definition of TYPE_READY to py_nspr_common.h so it can be
+    shared. Update all modules to utilize it.
+
+  * Replace incorrect use of free() with PyMem_Free for string data
+    returned by Python's utf-8 encoder.
+
+  * Add header dependency information to setup.py so modules will be
+    rebuilt when header files change.
+
+  * Add utility tuple_str() to convert a tuple to a string representation
+    by calling str() on each object in the tuple. Tuple.str() in CPython
+    only calls repr() on each member.
+
+  * HostEntry objects now store their aliases and NetworkAddress's in
+    internal tuples.
+
+
+2010-07-25  John Dennis  <jdennis@redhat.com> 0.10
+  * The following classes were added:
+      InitParameters
+      InitContext
+
+  * The following module functions were added:
+      nss.nss.nss_initialize()
+      nss.nss.nss_init_context()
+      nss.nss.nss_shutdown_context()
+      nss.nss.nss_init_flags()
+
+  * The following constants were added:
+      NSS_INIT_READONLY
+      NSS_INIT_NOCERTDB
+      NSS_INIT_NOMODDB
+      NSS_INIT_FORCEOPEN
+      NSS_INIT_NOROOTINIT
+      NSS_INIT_OPTIMIZESPACE
+      NSS_INIT_PK11THREADSAFE
+      NSS_INIT_PK11RELOAD
+      NSS_INIT_NOPK11FINALIZE
+      NSS_INIT_RESERVED
+      NSS_INIT_COOPERATE
+
+  * The following file was added:
+      test/setup_certs.py
+
+2010-05-28  John Dennis  <jdennis@redhat.com> 0.9
+
+  * Correct definciencies in auth_certificate_callback found in several
+    of the example files and documentation. If you've copied that code
+    you should merge those changes in.
+
+  * Unicode objects now accepted as well as str objects for
+    interfaces expecting a string.
+
+  * Sockets were enhanced thusly:
+      - Threads will now yield during blocking IO.
+      - Socket.makefile() reimplemented
+	  file object methods that had been missing (readlines(), sendall(),
+	  and iteration) were implemented, makefile now just returns the same
+	  Socket object but increments an "open" ref count. Thus a Socket
+	  object behaves like a file object and must be closed once for each
+	  makefile() call before it's actually closed.
+      - Sockets now support the iter protocol
+      - Add Socket.readlines(), Socket.sendall()
+
+  * The following classes were added:
+      AuthKeyID
+      BasicConstraints
+      CRLDistributionPoint
+      CRLDistributionPts
+      CertificateExtension
+      GeneralName
+      SignedCRL
+      DN
+      RDN
+      AVA
+      CertificateRequest
+
+  * The following module functions were added:
+      nss.nss.nss_is_initialized()
+      nss.nss.cert_crl_reason_from_name()
+      nss.nss.cert_crl_reason_name()
+      nss.nss.cert_general_name_type_from_name()
+      nss.nss.cert_general_name_type_name()
+      nss.nss.cert_usage_flags()
+      nss.nss.decode_der_crl()
+      nss.nss.der_universal_secitem_fmt_lines()
+      nss.nss.import_crl()
+      nss.nss.make_line_pairs()
+      nss.nss.oid_dotted_decimal()
+      nss.nss.oid_str()
+      nss.nss.oid_tag()
+      nss.nss.oid_tag_name()
+      nss.nss.read_der_from_file()
+      nss.nss.x509_alt_name()
+      nss.nss.x509_ext_key_usage()
+      nss.nss.x509_key_usage()
+
+  * The following class methods and properties were added:
+    Note: it's a method if the name is suffixed with (), a propety otherwise
+      Socket.next()
+      Socket.readlines()
+      Socket.sendall()
+      SSLSocket.next()
+      SSLSocket.readlines()
+      SSLSocket.sendall()
+      AuthKeyID.key_id
+      AuthKeyID.serial_number
+      AuthKeyID.get_general_names()
+      CRLDistributionPoint.issuer
+      CRLDistributionPoint.get_general_names()
+      CRLDistributionPoint.get_reasons()
+      CertDB.find_crl_by_cert()
+      CertDB.find_crl_by_name()
+      Certificate.extensions
+      CertificateExtension.critical
+      CertificateExtension.name
+      CertificateExtension.oid
+      CertificateExtension.oid_tag
+      CertificateExtension.value
+      GeneralName.type_enum
+      GeneralName.type_name
+      GeneralName.type_string
+      SecItem.der_to_hex()
+      SecItem.get_oid_sequence()
+      SecItem.to_hex()
+      SignedCRL.delete_permanently()
+      AVA.oid
+      AVA.oid_tag
+      AVA.value
+      AVA.value_str
+      DN.cert_uid
+      DN.common_name
+      DN.country_name
+      DN.dc_name
+      DN.email_address
+      DN.locality_name
+      DN.org_name
+      DN.org_unit_name
+      DN.state_name
+      DN.add_rdn()
+      DN.has_key()
+      RDN.has_key()
+
+  * The following module functions were removed:
+    Note: use nss.nss.oid_tag() instead
+      nss.nss.sec_oid_tag_from_name()
+      nss.nss.sec_oid_tag_name()
+      nss.nss.sec_oid_tag_str()
+
+  * The following files were added:
+      doc/examples/cert_dump.py
+      test/test_cert_components.py
+
+  * Apply patches from  Miloslav Trmač <mitr@redhat.com>
+    for ref counting and threading support. Thanks Miloslav!
+
+  * Review all ref counting, numerous ref counting fixes
+
+  * Implement cyclic garbage collection support by
+    adding object traversal and clear methods
+
+  * Identify static variables, move to thread local storage
+
+  * Remove python-nss specific httplib.py, no longer needed
+    python-nss now compatible with standard library
+
+  * Rewrite httplib_example.py to use standard library and illustrate
+    ssl, non-ssl, connection class, http class usage
+
+2009-09-21  John Dennis  <jdennis@redhat.com> 0.8
+  * The following methods, properties  and functions were added:
+    SecItem.type SecItem.len, SecItem.data
+    PK11SymKey.key_data, PK11SymKey.key_length, PK11SymKey.slot
+    create_context_by_sym_key
+    param_from_iv
+    generate_new_param
+    get_iv_length
+    get_block_size
+    get_pad_mechanism
+  * SecItem's now support indexing and slicing on their data
+  * Clean up parsing and parameter validation of variable arg functions
+
+2009-09-18  John Dennis  <jdennis@redhat.com> 0.7
+  * add support for symmetric encryption/decryption
+    more support for digests (hashes)
+
+    The following classes were added:
+    PK11SymKey PK11Context
+
+    The following methods and functions were added:
+    get_best_wrap_mechanism          get_best_key_length
+    key_gen                          derive
+    get_key_length                   digest_key
+    clone_context                    digest_begin
+    digest_op                        cipher_op
+    finalize                         digest_final
+    read_hex                         hash_buf
+    sec_oid_tag_str                  sec_oid_tag_name
+    sec_oid_tag_from_name            key_mechanism_type_name
+    key_mechanism_type_from_name     pk11_attribute_type_name
+    pk11_attribute_type_from_name    get_best_slot
+    get_internal_key_slot            create_context_by_sym_key
+    import_sym_key                   create_digest_context
+    param_from_iv                    param_from_algid
+    generate_new_param               algtag_to_mechanism
+    mechanism_to_algtag
+
+    The following files were added:
+    test/cipher_test.py test/digest_test.py
+
+2009-07-08  John Dennis  <jdennis@redhat.com> 0.6
+  * fix bug #510343 client_auth_data_callback seg faults if False
+    is returned from callback
+
+2009-07-01  John Dennis  <jdennis@redhat.com> 0.5
+  * restore ssl.nss_init and ssl.nss_shutdown but make them deprecated
+    add __version__ string to nss module
+
+2009-06-30  John Dennis  <jdennis@redhat.com> 0.4
+  * add binding for NSS_NoDB_Init(), bug #509002
+    move nss_init and nss_shutdown from ssl module to nss module
+
+2009-06-04  John Dennis  <jdennis@redhat.com> 0.3
+
+  * import to Mozilla CVS, tweak directory layout
+
+2009-05-21  John Dennis  <jdennis@redhat.com> 0.2
+  * apply patch from bug #472805, (Miloslav Trmač)
+    Don't allow closing a socket twice, that causes crashes.
+    New function nss.io.Socket.new_socket_pair()
+    New function nss.io.Socket.poll()
+    New function nss.io.Socket.import_tcp_socket()
+    New method nss.nss.Certificate.get_subject_common_name()
+    New function nss.nss.generate_random()
+    Fix return value creation in SSLSocket.get_security_status
+    New function nss.ssl.SSLSocket.import_tcp_socket()
+    Convert licensing to MPL tri-license
