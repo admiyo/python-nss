@@ -178,9 +178,7 @@ typedef struct {
 
 typedef struct {
     PyObject_HEAD
-    PyObject *py_prime;
-    PyObject *py_subprime;
-    PyObject *py_base;
+    SECKEYPQGParams pqg_params;
 } KEYPQGParams;
 
 /* ========================================================================== */

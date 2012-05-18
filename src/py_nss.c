@@ -5561,28 +5561,13 @@ AlgorithmID_new_from_SECAlgorithmID(SECAlgorithmID *id)
 
 /* ============================ Attribute Access ============================ */
 
-    if ((self->py_prime = SecItem_new_from_SECItem(&params->prime, SECITEM_unknown)) == NULL) {
-        Py_CLEAR(self);
-        return NULL;
-    }
-
-    if ((self->py_subprime = SecItem_new_from_SECItem(&params->subPrime, SECITEM_unknown)) == NULL) {
-        Py_CLEAR(self);
-        return NULL;
-    }
-
-    if ((self->py_base = SecItem_new_from_SECItem(&params->base, SECITEM_unknown)) == NULL) {
-        Py_CLEAR(self);
-        return NULL;
-    }
 
 static PyObject *
 KEYPQGParams_get_prime(KEYPQGParams *self, void *closure)
 {
     TraceMethodEnter(self);
 
-    Py_INCREF(self->py_prime);
-    return self->py_prime;
+    return integer_secitem_to_pylong(&self->pqg_params.prime);
 }
 
 static PyObject *
@@ -5590,8 +5575,7 @@ KEYPQGParams_get_subprime(KEYPQGParams *self, void *closure)
 {
     TraceMethodEnter(self);
 
-    Py_INCREF(self->py_subprime);
-    return self->py_subprime;
+    return integer_secitem_to_pylong(&self->pqg_params.subPrime);
 }
 
 static PyObject *
@@ -5599,8 +5583,7 @@ KEYPQGParams_get_base(KEYPQGParams *self, void *closure)
 {
     TraceMethodEnter(self);
 
-    Py_INCREF(self->py_base);
-    return self->py_base;
+    return integer_secitem_to_pylong(&self->pqg_params.base);
 }
 
 static
@@ -5634,32 +5617,15 @@ KEYPQGParams_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         return NULL;
     }
 
-    self->py_prime = NULL;
-    self->py_subprime = NULL;
-    self->py_base = NULL;
+    memset(&self->pqg_params, 0, sizeof(self->pqg_params));
+
+    if ((self->pqg_params.arena = PORT_NewArena(DER_DEFAULT_CHUNKSIZE)) == NULL) {
+        type->tp_free(self);
+        return set_nspr_error(NULL);
+    }
 
     TraceObjNewLeave(self);
     return (PyObject *)self;
-}
-
-static int
-KEYPQGParams_traverse(KEYPQGParams *self, visitproc visit, void *arg)
-{
-    Py_VISIT(self->py_prime);
-    Py_VISIT(self->py_subprime);
-    Py_VISIT(self->py_base);
-    return 0;
-}
-
-static int
-KEYPQGParams_clear(KEYPQGParams* self)
-{
-    TraceMethodEnter(self);
-
-    Py_CLEAR(self->py_prime);
-    Py_CLEAR(self->py_subprime);
-    Py_CLEAR(self->py_base);
-    return 0;
 }
 
 static void
@@ -5667,7 +5633,8 @@ KEYPQGParams_dealloc(KEYPQGParams* self)
 {
     TraceMethodEnter(self);
 
-    KEYPQGParams_clear(self);
+    PORT_FreeArena(self->pqg_params.arena, PR_FALSE);
+
     self->ob_type->tp_free((PyObject*)self);
 }
 
@@ -5710,9 +5677,9 @@ KEYPQGParams_str(KEYPQGParams *self)
         return NULL;
     }
 
-    PyTuple_SetItem(args, 0, PyObject_Str(self->py_prime));
-    PyTuple_SetItem(args, 1, PyObject_Str(self->py_subprime));
-    PyTuple_SetItem(args, 2, PyObject_Str(self->py_base));
+    PyTuple_SetItem(args, 0, KEYPQGParams_get_prime(self, NULL));
+    PyTuple_SetItem(args, 1, KEYPQGParams_get_subprime(self, NULL));
+    PyTuple_SetItem(args, 2, KEYPQGParams_get_base(self, NULL));
 
     str = PyString_Format(fmt, args);
 
@@ -5742,10 +5709,10 @@ static PyTypeObject KEYPQGParamsType = {
     0,						/* tp_getattro */
     0,						/* tp_setattro */
     0,						/* tp_as_buffer */
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE | Py_TPFLAGS_HAVE_GC,	/* tp_flags */
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/* tp_flags */
     KEYPQGParams_doc,				/* tp_doc */
-    (traverseproc)KEYPQGParams_traverse,	/* tp_traverse */
-    (inquiry)KEYPQGParams_clear,		/* tp_clear */
+    0,						/* tp_traverse */
+    0,						/* tp_clear */
     0,						/* tp_richcompare */
     0,						/* tp_weaklistoffset */
     0,						/* tp_iter */
@@ -5774,19 +5741,19 @@ KEYPQGParams_new_from_SECKEYPQGParams(SECKEYPQGParams *params)
         return NULL;
     }
 
-    if ((self->py_prime = SecItem_new_from_SECItem(&params->prime, SECITEM_unknown)) == NULL) {
+    if ((SECITEM_CopyItem(self->pqg_params.arena, &self->pqg_params.prime, &params->prime)) != SECSuccess) {
         Py_CLEAR(self);
-        return NULL;
+        return set_nspr_error(NULL);
     }
 
-    if ((self->py_subprime = SecItem_new_from_SECItem(&params->subPrime, SECITEM_unknown)) == NULL) {
+    if ((SECITEM_CopyItem(self->pqg_params.arena, &self->pqg_params.subPrime, &params->subPrime)) != SECSuccess) {
         Py_CLEAR(self);
-        return NULL;
+        return set_nspr_error(NULL);
     }
 
-    if ((self->py_base = SecItem_new_from_SECItem(&params->base, SECITEM_unknown)) == NULL) {
+    if ((SECITEM_CopyItem(self->pqg_params.arena, &self->pqg_params.base, &params->base)) != SECSuccess) {
         Py_CLEAR(self);
-        return NULL;
+        return set_nspr_error(NULL);
     }
 
     TraceObjNewLeave(self);
@@ -20817,4 +20784,3 @@ if (_AddIntConstantWithLookup(m, #constant, constant, \
     ExportConstant(PKCS12_DES_EDE3_168);
 
 }
-
